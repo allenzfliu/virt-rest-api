@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h1 id="header">Loading...</h1>
+<div id="info">Loading...</div>
+<button onclick="load();">Reload</button>
+<form id = "start_form" action="" method="post">
+    <button id = "start_button">Loading...</button>
+</form>
+<form id = "stop_form" action="" method="post">
+    <button id = "stop_button">Loading...</button>
+</form>
+
+<div id="tail">
+<script type="text/javascript">
+function load() {
+// partially generated via deepseek
+// Get URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+
+// Get specific parameter
+const paramValue = urlParams.get('paramName');
+// console.log(paramValue);
+
+// Get all parameters as object
+const params = Object.fromEntries(urlParams.entries());
+// console.log(params);
+vm_name = params["name"];
+document.getElementById("header").innerHTML = vm_name;
+if (vm_name == null) {
+	document.getElementById("info").innerHTML = "Please provide a VM name!";
+} else {
+	
+	document.getElementById("start_form").action = "http://api.rhodes.island:8000/vm_start?name=" + vm_name;
+	document.getElementById("stop_form").action = "http://api.rhodes.island:8000/vm_stop?name=" + vm_name;
+	document.getElementById("start_button").innerHTML = "Start VM";
+	document.getElementById("stop_button").innerHTML = "Stop VM";
+	
+	
+	// console.log("This is a string");
+const url = "http://api.rhodes.island:8000/vm_info?name=" + vm_name;
+// console.log("URL: " + url);
+fetch(url).then(response => {
+	if (!response.ok) {
+		if (response.status == 404) {
+			document.getElementById("info").innerHTML = "No such VM " + vm_name;
+		} else {
+			thrown = Error(`HTTP error! Status: ${response.status}`);
+			console.error(thrown);
+			throw thrown;
+		}
+	}
+	return response.json();
+}).then(response => {
+	info = response["info"];
+	status = "unresolved";
+	if (info[0] == 1) {
+		status = "Running";
+	} else if (info[0] == 5) {
+		status = "Offline";
+	}
+	html = "<p>Status: " + status + "</p>";
+	html += "<p>Min memory: " + Math.floor(info[1]/1000000) + "G (" + info[1] + "K) </p>";
+	html += "<p>Max memory: " + Math.floor(info[2]/1000000) + "G (" + info[2] + "K) </p>";
+	html += "<p>VCPUs: " + info[3] + "</p>";
+	html += "<p>Runtime (?): " + Math.floor(info[4]/10000000) + "hr (" + info[4] + ") </p>";
+	document.getElementById("info").innerHTML = html;
+}).catch(err => {
+	document.getElementById(id).innerHTML = "<p type=\"time_out\">ERROR: lgd-api is down!</p>" + 
+		"<p>"+err+"</p>";
+});
+
+}
+
+}
+load();
+</script>
+</div>
+</body>
+</html>
