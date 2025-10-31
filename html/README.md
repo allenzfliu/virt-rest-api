@@ -1,0 +1,1 @@
+This is a basic HTML viewer. Client-side Javascript queries the API and then formats it into HTML.
