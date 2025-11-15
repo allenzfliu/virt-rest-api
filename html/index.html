@@ -22,6 +22,10 @@ fetch(url).then(response => {
 function list(vm_array, p_class) {
 	try {
 		out = "";
+		// sort first
+		vm_array.sort((vma,vmb) => {
+			return vma["name"].localeCompare(vmb["name"])
+		})
 		for (var i = 0; i < vm_array.length; i++) {
 			vm_name = vm_array[i]["name"];
 			out += "<div class=\"" + p_class + "\"><p>" + 
