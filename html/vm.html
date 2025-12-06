@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<script type="text/javascript">
+		const API_ENDPOINT_URL = "http://api.rhodes.island:8000/"
+	</script>
 </head>
 <body>
 <h1 id="header">Loading...</h1>
@@ -33,14 +36,14 @@ if (vm_name == null) {
 	document.getElementById("info").innerHTML = "Please provide a VM name!";
 } else {
 	
-	document.getElementById("start_form").action = "http://api.rhodes.island:8000/vm_start?name=" + vm_name;
-	document.getElementById("stop_form").action = "http://api.rhodes.island:8000/vm_stop?name=" + vm_name;
+	document.getElementById("start_form").action = API_ENDPOINT_URL + "vm_start?name=" + vm_name;
+	document.getElementById("stop_form").action = API_ENDPOINT_URL + "vm_stop?name=" + vm_name;
 	document.getElementById("start_button").innerHTML = "Start VM";
 	document.getElementById("stop_button").innerHTML = "Stop VM";
 	
 	
 	// console.log("This is a string");
-const url = "http://api.rhodes.island:8000/vm_info?name=" + vm_name;
+const url = API_ENDPOINT_URL + "vm_info?name=" + vm_name;
 // console.log("URL: " + url);
 fetch(url).then(response => {
 	if (!response.ok) {
