@@ -2,19 +2,18 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import libvirt
+import os
+
+# env constants
+from config import URI,FRONTEND_BASE_URL
 
 app = FastAPI()
 
-#origins = [
-#	"http://hyperv-client.rhodes.island:8000", "http://hyperv-client.rhodes.island",
-#	"http://api.hyperv-client.rhodes.island:8000", "http://api.hyperv-client.rhodes.island",
-#	"http://rhodes.island:8000", "http://rhodes.island", ]
 origins=["*"]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], )
 
-URI = "qemu+ssh://chen@rhodes.island/system"
 
-#This is a comment to commit!
+
 def connection():
 	return libvirt.open(URI)
 
@@ -103,7 +102,7 @@ def root(name: str):
 				
 				# create starts domain
 				domain.create()
-				return RedirectResponse("http://api.rhodes.island/vm.html?name=" + name, status_code=301)
+				return RedirectResponse(FRONTEND_BASE_URL + "/vm.html?name=" + name, status_code=301)
 			except:
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
 	except HTTPException as e:
@@ -121,7 +120,7 @@ def root(name: str):
 				domain.destroy()
 			except:
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
-			return RedirectResponse("http://api.rhodes.island/vm.html?name=" + name, status_code=301)
+			return RedirectResponse(FRONTEND_BASE_URL + "/vm.html?name=" + name, status_code=301)
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
