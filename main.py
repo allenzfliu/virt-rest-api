@@ -2,10 +2,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import libvirt
-import os
 
 # env constants
 from config import URI,FRONTEND_BASE_URL
+# print(URI)
 
 app = FastAPI()
 
@@ -75,7 +75,7 @@ def root(type: str):
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
-@app.get("/vm_info")
+@app.get("/vm_data")
 def root(name: str):
 	try:
 		with connection() as qemu:
@@ -90,6 +90,28 @@ def root(name: str):
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
+# @app.get("/vm_net")
+# def root(name: str):
+# 	try:
+# 		with connection() as qemu:
+# 			vm = qemu.lookupByName(name)
+# 			return {"info": vm.info()}
+
+@app.get("/vm_xmldesc")
+def root(name: str):
+	try:
+		with connection() as qemu:
+			try:
+				domain = qemu.lookupByName(name)
+				return {"xml": domain.XMLDesc()}
+			except:
+				raise HTTPException(status_code=400,detail=f"No VM named {name}")
+	except HTTPException as e:
+		raise e
+	except Exception as e:
+		print(e);
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+					
 @app.post("/vm_start")
 def root(name: str):
 	try:
