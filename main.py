@@ -5,6 +5,7 @@ import libvirt
 
 # env constants
 from config import URI,FRONTEND_BASE_URL
+from config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
 # print(URI)
 
 app = FastAPI()
@@ -17,10 +18,19 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 def connection():
 	return libvirt.open(URI)
 
+def check_config(config_val):
+	# return itself a decorator func
+	def decorator(func):
+		def wrapper():
+			print("This is my cool decorator function! which used the config_val " + str(config_val))
+			func()
+		return wrapper
+	return decorator
+
 def vm_stats(vm):
 	if (vm == None):
 		return None;
-	out = {"name": vm.name(), "state": vm.state(), "id": vm.ID(), "status": "unitiialized"}
+	out = {"name": vm.name(), "state": vm.state(), "id": vm.ID(), "status": "uninitialized"}
 	match vm.state()[0]:
 		case 1:
 			out["status"] = "active"
@@ -39,6 +49,7 @@ def vm_list(list):
 	return out;
 
 @app.get("/")
+@check_config("asdf")
 def root():
 	try:
 		with connection() as qemu:
