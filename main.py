@@ -56,7 +56,7 @@ def root():
 def root():
 	try:
 		with connection() as qemu:
-			return {"hostname": qemu.getInfo()}
+			return {"host_data": qemu.getInfo()}
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
