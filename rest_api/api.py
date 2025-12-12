@@ -4,9 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import libvirt
 
 # env constants
-from config import URI,FRONTEND_BASE_URL
-from config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
+from rest_api.config import URI,FRONTEND_BASE_URL
+from rest_api.config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
 # print(URI)
+
+from lib.config_manager import check_config
 
 def main():
 	app = FastAPI()
@@ -51,7 +53,7 @@ def main():
 		return out;
 
 	@app.get("/")
-	@check_config("asdf")
+	@check_config(ROOT_ENABLE)
 	def root():
 		try:
 			with connection() as qemu:
@@ -61,6 +63,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 	@app.get("/host")
+	@check_config(HOST_ENABLE)
 	def root():
 		try:
 			with connection() as qemu:
@@ -70,6 +73,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 	@app.get("/vms")
+	@check_config(VMS_ENABLE)
 	def root(type: str):
 		try:
 			with connection() as qemu:
@@ -89,6 +93,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 	@app.get("/vm_data")
+	@check_config(VM_DATA_ENABLE)
 	def root(name: str):
 		try:
 			with connection() as qemu:
@@ -104,6 +109,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 	# @app.get("/vm_net")
+	# @check_config(VM_NET_ENABLE)
 	# def root(name: str):
 	# 	try:
 	# 		with connection() as qemu:
@@ -111,6 +117,7 @@ def main():
 	# 			return {"info": vm.info()}
 
 	@app.get("/vm_xmldesc")
+	@check_config(VM_XMLDESC_ENABLE)
 	def root(name: str):
 		try:
 			with connection() as qemu:
@@ -126,6 +133,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 						
 	@app.post("/vm_start")
+	@check_config(VM_START_ENABLE)
 	def root(name: str):
 		try:
 			with connection() as qemu:
@@ -147,6 +155,7 @@ def main():
 			raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 	@app.post("/vm_stop")
+	@check_config(VM_STOP_ENABLE)
 	def root(name: str):
 		try:
 			with connection() as qemu:
