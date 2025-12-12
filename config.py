@@ -1,6 +1,8 @@
 import os
 
 # adding config vars
+# these don't currently do anything! except make it compile properly
+# because i gave up :<
 ROOT_ENABLE = True
 VMS_ENABLE = False
 HOST_ENABLE = 404
