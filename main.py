@@ -5,7 +5,7 @@ import libvirt
 
 # env constants
 from config import URI,FRONTEND_BASE_URL
-from config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
+# from config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
 # print(URI)
 
 # from lib.config_manager import check_config
@@ -81,7 +81,7 @@ def root(type: str):
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
-@app.get("/vm_data")
+@app.get("/vm_info")
 # @check_config(VM_DATA_ENABLE)
 def root(name: str):
 	try:
