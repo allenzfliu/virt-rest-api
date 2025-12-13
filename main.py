@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+import xml.etree.ElementTree as ET
 import libvirt
 
 # env constants
@@ -143,8 +144,20 @@ def root(name: str):
 	try:
 		with connection() as qemu:
 			try:
-				domain = qemu.lookupByName(name)
-				return {"xml": domain.XMLDesc()}
+				xml:str = qemu.lookupByName(name).XMLDesc()
+				xml_root = ET.fromstring(xml)
+				devices = xml_root.find("devices")
+				if (devices != None):
+					graphics = devices.find("graphics")
+					if (graphics != None):
+						attribs = graphics.attrib
+						if ('type' in attribs and attribs['type'] == 'spice'):
+							if ('listen' in attribs and 'port' in attribs):
+								return {
+									"ip": attribs['listen'],
+									"port": attribs['port']}
+				# if any of these fail, fallback
+				return {"ip":None, "port": None}
 			except:
 				raise HTTPException(status_code=400,detail=f"No VM named {name}")
 	except HTTPException as e:

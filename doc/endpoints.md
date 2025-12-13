@@ -112,9 +112,9 @@ Output:
 
     {
         "ip":
-            Listen IP. This will probably be 0.0.0.0 or 127.0.0.1.
+            Listen IP. This will probably be 0.0.0.0 or 127.0.0.1, or null if graphics is not enabled.
         "port":
-            UDP Spice port.
+            UDP Spice port, or null if graphics is not enabled.
     }
 
 ### POST /vm_start
