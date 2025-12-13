@@ -120,7 +120,40 @@ def root(name: str):
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
-					
+
+@app.get("/vm_ip")
+# @check_config(VM_XMLDESC_ENABLE)
+def root(name: str):
+	try:
+		with connection() as qemu:
+			try:
+				domain = qemu.lookupByName(name)
+				return {"xml": domain.XMLDesc()}
+			except:
+				raise HTTPException(status_code=400,detail=f"No VM named {name}")
+	except HTTPException as e:
+		raise e
+	except Exception as e:
+		print(e);
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+
+@app.get("/vm_viewer")
+# @check_config(VM_XMLDESC_ENABLE)
+def root(name: str):
+	try:
+		with connection() as qemu:
+			try:
+				domain = qemu.lookupByName(name)
+				return {"xml": domain.XMLDesc()}
+			except:
+				raise HTTPException(status_code=400,detail=f"No VM named {name}")
+	except HTTPException as e:
+		raise e
+	except Exception as e:
+		print(e);
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+
+
 @app.post("/vm_start")
 # @check_config(VM_START_ENABLE)
 def root(name: str):

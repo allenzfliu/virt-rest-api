@@ -1,8 +1,8 @@
 # Endpoints Documentation
 
-**NOTE**: Please read the README.md first.
-
 *Additional note*: I don't know where everything comes from. If I say see the libvirt library, I mean the libvirt Python library which I used to build this API.
+
+# **NOTE**: Please read README.md first.
 
 ### GET /
 The HTTP root returns a single JSON object with only a single parameter: the name of the hypervisor host.
@@ -67,6 +67,25 @@ Output:
         ]
     }
 
+### GET /vm_ip
+
+Retrieves the IP addresses of a virtual machine.
+
+Parameters:
+
+    ?name=
+        Name of virtual machine.
+
+Output:
+
+    {"ips":
+        IP addresses in CIDR notation.
+        [
+            Index *:
+                IP address in CIDR notation.
+        ]
+    }
+
 ### GET /vm_xmldesc
 Retrieves the raw XMLdesc of a virtual machine.
 
@@ -81,6 +100,23 @@ Output:
         Domain raw XML.
     </domain type>
 
+### GET /vm_viewer
+Retrieves the IP address and viewport of the VM.
+
+Parameters:
+
+    ?name=
+        Name of virtual machine.
+
+Output:
+
+    {
+        "ip":
+            Listen IP. This will probably be 0.0.0.0 or 127.0.0.1.
+        "port":
+            UDP Spice port.
+    }
+
 ### POST /vm_start
 Starts a named VM.
 
@@ -91,7 +127,20 @@ Parameters:
 
 Output:
 
-Outputs a 301 redirect back to the frontend VM html. As I write this I realize that's probably not a great idea, but that's how it's coded. By the time you read this, I've definitely changed this doc.
+    {"status":
+        True, if the status is now equal to active, or false otherwise.
+    }
 
 ### POST /vm_stop
 Same as `/vm_start`, but stops instead of starts.
+
+Parameters:
+
+    ?name=
+        Name of virtual machine.
+
+Output:
+
+    {"status":
+        True, if the status is now equal to inactive, or false otherwise.
+    }
