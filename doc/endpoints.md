@@ -91,6 +91,8 @@ Output:
 ### GET /vm_xmldesc
 Retrieves the raw XMLdesc of a virtual machine.
 
+***NOTE***: This does not return a json wrapper. The raw XML is returned instead.
+
 Parameters:
 
     ?name= str
@@ -100,6 +102,7 @@ Output:
 
     <domain type>
         Domain raw XML.
+        NOTE: This does not return a json wrapper. The raw XML is returned instead.
     </domain type>
 
 ### GET /vm_viewer

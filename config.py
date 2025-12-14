@@ -13,5 +13,5 @@ VM_START_ENABLE = True
 VM_STOP_ENABLE = True
 
 
-URI:str = str(os.getenv("URI"))
+QEMU_URI:str = str(os.getenv("URI"))
 FRONTEND_BASE_URL:str = str(os.getenv("FRONTEND_BASE_URL"))

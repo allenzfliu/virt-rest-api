@@ -5,31 +5,18 @@ import xml.etree.ElementTree as ET
 import libvirt
 from libvirt import virDomain
 from sympy import Domain
+from lib.consts import STATE_TRANSLATION_DICT
 
 # env constants
-from config import URI,FRONTEND_BASE_URL
-# from config import ROOT_ENABLE,VMS_ENABLE,HOST_ENABLE,VM_DATA_ENABLE,VM_NET_ENABLE,VM_XMLDESC_ENABLE,VM_START_ENABLE,VM_STOP_ENABLE
-# print(URI)
-
-# from lib.config_manager import check_config
+from config import QEMU_URI,FRONTEND_BASE_URL
 
 app = FastAPI()
 
 origins=["*"]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], )
 
-STATE_TRANSLATION_DICT = {}
-STATE_TRANSLATION_DICT[0] = "no state"
-STATE_TRANSLATION_DICT[1] = "running"
-STATE_TRANSLATION_DICT[2] = "blocked"
-STATE_TRANSLATION_DICT[3] = "paused"
-STATE_TRANSLATION_DICT[4] = "shutdown"
-STATE_TRANSLATION_DICT[5] = "shutoff"
-STATE_TRANSLATION_DICT[6] = "crashed"
-STATE_TRANSLATION_DICT[7] = "guest suspended"
-
 def connection():
-	return libvirt.open(URI)
+	return libvirt.open(QEMU_URI)
 
 def retrieve_vm(name:str) -> virDomain:
 	try:
@@ -128,12 +115,8 @@ def root(name: str):
 # @check_config(VM_XMLDESC_ENABLE)
 def root(name: str):
 	try:
-		with connection() as qemu:
-			try:
-				domain = qemu.lookupByName(name)
-				return {"xml": domain.XMLDesc()}
-			except:
-				raise HTTPException(status_code=400,detail=f"No VM named {name}")
+		domain = retrieve_vm(name)
+		return domain.XMLDesc()
 	except HTTPException as e:
 		raise e
 	except Exception as e:
@@ -184,6 +167,31 @@ def root(name: str):
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
+@app.get("/vm_state")
+def root(name:str):
+	try:
+		vm = retrieve_vm(name)
+		return {"state": vm.state()}
+	except HTTPException as e:
+		raise e
+	except Exception as e:
+		print(e)
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+
+@app.get("/vm_status")
+def root(name:str|None, state:int|None):
+	try:
+		if (name != None and state == None):
+			vm = retrieve_vm(name)
+			return {"status": status_lookup(vm.state())}
+		if (state != None and name == None):
+			return {"status": status_lookup(state)}
+		raise HTTPException(status_code=422)
+	except HTTPException as e:
+		raise e
+	except Exception as e:
+		print(e)
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 @app.post("/vm_start")
 # @check_config(VM_START_ENABLE)
