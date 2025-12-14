@@ -1,11 +1,16 @@
+#external imports
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import xml.etree.ElementTree as ET
 import libvirt
+import sys
 from libvirt import virDomain
 from sympy import Domain
+
+# my imports
 from lib.consts import STATE_TRANSLATION_DICT
+from tester.tester import test
 
 # env constants
 from config import QEMU_URI,FRONTEND_BASE_URL
@@ -229,3 +234,9 @@ def root(name: str):
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+
+if (__name__ == "__main__"):
+	if ("test" in sys.argv or "tester" in sys.argv):
+		test(app)
+	else:
+		print("Please see the README for how to run this app! Quitting.")
