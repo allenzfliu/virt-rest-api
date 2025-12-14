@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import xml.etree.ElementTree as ET
 import libvirt
+from libvirt import virDomain
+from sympy import Domain
 
 # env constants
 from config import URI,FRONTEND_BASE_URL
@@ -16,30 +18,46 @@ app = FastAPI()
 origins=["*"]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], )
 
-
+STATE_TRANSLATION_DICT = {}
+STATE_TRANSLATION_DICT[0] = "no state"
+STATE_TRANSLATION_DICT[1] = "running"
+STATE_TRANSLATION_DICT[2] = "blocked"
+STATE_TRANSLATION_DICT[3] = "paused"
+STATE_TRANSLATION_DICT[4] = "shutdown"
+STATE_TRANSLATION_DICT[5] = "shutoff"
+STATE_TRANSLATION_DICT[6] = "crashed"
+STATE_TRANSLATION_DICT[7] = "guest suspended"
 
 def connection():
 	return libvirt.open(URI)
 
-def vm_stats(vm):
-	if (vm == None):
-		return None;
-	out = {"name": vm.name(), "state": vm.state(), "id": vm.ID(), "status": "uninitialized"}
-	match vm.state()[0]:
-		case 1:
-			out["status"] = "active"
-		case 5:
-			out["status"] = "inactive"
-		case _:
-			out["status"] = "unknown"
-	return out;
+def retrieve_vm(name:str) -> virDomain:
+	try:
+		with connection() as qemu:
+			try:
+				vm = qemu.lookupByName(name)
+				if (vm != None):
+					# it shouldn't be, but just a final sanity check
+					return vm
+			except:
+				raise HTTPException(status_code=400, detail=f"No VM named {name}")
+	except HTTPException as e:
+		raise(e)	
+	except Exception as e:
+		print(e);
+		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+
+def status_lookup(state:int):
+	if (state in STATE_TRANSLATION_DICT):
+		return STATE_TRANSLATION_DICT[state]
+	return "unknown"
 
 def vm_list(list):
 	if (list == None):
 		return None;
 	out = [];
 	for vm in list:
-		out.append(vm_stats(vm))
+		elem = {"name": vm.name(), "state": status_lookup(vm.state()), "id": vm.ID()}
 	return out;
 
 @app.get("/")
@@ -64,18 +82,17 @@ def root():
 
 @app.get("/vms")
 # @check_config(VMS_ENABLE)
-def root(type: str):
+def root(type: str | int):
 	try:
 		with connection() as qemu:
-			match type:
-				case 'all':
-					return {"vms": vm_list(qemu.listAllDomains(0))}
-				case 'active':
-					return {"vms": vm_list(qemu.listAllDomains(1))}
-				case 'inactive':
-					return {"vms": vm_list(qemu.listAllDomains(2))}
-				case _:
-					raise HTTPException(status_code=404, detail=f"No such type {type}")
+			if (type in ('all', -1)):
+				return {"vms": vm_list(qemu.listAllDomains(0))}
+			elif (type in ('active', 1)):
+				return {"vms": vm_list(qemu.listAllDomains(1))}
+			elif (type in ('inactive', 2)):
+				return {"vms": vm_list(qemu.listAllDomains(2))}
+			else:
+				raise HTTPException(status_code=404, detail=f"No such type {type}")
 	except HTTPException as e:
 		raise e;
 	except Exception as e:
@@ -86,12 +103,13 @@ def root(type: str):
 # @check_config(VM_DATA_ENABLE)
 def root(name: str):
 	try:
-		with connection() as qemu:
-			try:
-				vm = qemu.lookupByName(name)
-				return {"info": vm.info()}
-			except:
-				raise HTTPException(status_code=400, detail=f"No VM named {name}")
+		vm = retrieve_vm(name)
+		info = vm.info()
+		return {"state": info[0],
+		  "max_mem": info[1],
+		  "cur_mem": info[2],
+		  "vcpu": info[3],
+		  "cputime": info[4]}
 	except HTTPException as e:
 		raise(e)	
 	except Exception as e:

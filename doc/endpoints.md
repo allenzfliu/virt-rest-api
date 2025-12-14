@@ -9,7 +9,7 @@ The HTTP root returns a single JSON object with only a single parameter: the nam
 
 Output:
     
-    {"host":
+    {"host": str
         The name of the hypervisor host.
     }
 
@@ -27,44 +27,47 @@ Output:
 
 Parameters:
 
-    ?type=
-        'active' for active virtual machines.
-        'inactive' for inactive virtual machines.
-        'all' for all virtual machines.
+    ?type= str | int
+        1 | 'active' for active virtual machines.
+        5 | 'inactive' for inactive virtual machines.
+        -1 | 'all' for all virtual machines.
 
 Output:
 
     {"vms":
-        Array of VM listings. Taken directly from QEMU.
+        Array of VM listings.
         [
-            See documentation for .listAllDomains() in libvirt for output information.
+            Index *:
+                {"name": str
+                    VM Domain Name.
+                , "state": str
+                    VM State. See 
+                , "id": int
+                    VM ID number
+                }
         ]
     }
 
 ### GET /vm_info
-Returns a listing of some basic information about a virtual machine. I haven't figured out what all the numbers mean, but I believe I've figured out some of them.
+Returns a listing of some basic information about a virtual machine. Uses https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainInfo.
 
 Parameters:
 
-    ?name=
+    ?name= str
         Name of virtual machine.
 
 Output:
 
-    {"info":
-        Info listing. See documentation for vm.info() in libvirt for more information.
-        [
-            Index 0: integer
-                VM status integer. 5 means inactive, 1 means active.
-            Index 1: integer
-                I'm still not sure, but I think it means Max memory.
-            Index 2: integer
-                I'm still not sure, but I think it means min memory.
-            Index 3: integer
-                I'm fairly sure this is vcpus used.
-            Index 4: integer
-                I still have no idea what this one means.
-        ]
+    {"state": int
+        State of VMs.
+    , "max_mem": int
+        Maximum memory allocated to this VM in KB.
+    , "cur_mem: int
+        Currrent allocated memory to this VM in KB.
+    , "vcpu": int
+        Number of vCPUs used.
+    , "cputime": int
+        CPU time in ns.
     }
 
 ### GET /vm_ip
@@ -73,13 +76,12 @@ Retrieves the IP addresses of a virtual machine.
 
 Parameters:
 
-    ?name=
+    ?name= str
         Name of virtual machine.
 
 Output:
 
-    {"ips":
-        IP addresses in CIDR notation.
+    {"ips": str
         [
             Index *:
                 IP address in CIDR notation.
@@ -91,7 +93,7 @@ Retrieves the raw XMLdesc of a virtual machine.
 
 Parameters:
 
-    ?name=
+    ?name= str
         Name of virtual machine.
 
 Output:
@@ -105,16 +107,45 @@ Retrieves the IP address and viewport of the VM.
 
 Parameters:
 
-    ?name=
+    ?name= str
         Name of virtual machine.
 
 Output:
 
-    {
-        "ip":
-            Listen IP. This will probably be 0.0.0.0 or 127.0.0.1, or null if graphics is not enabled.
-        "port":
-            UDP Spice port, or null if graphics is not enabled.
+    {"ip": str
+        Listen IP. This will probably be 0.0.0.0 or 127.0.0.1, or null if graphics is not enabled.
+    , "port": int
+        UDP Spice port, or null if graphics is not enabled.
+    }
+
+### GET /vm_state
+Retrieves the state of a VM. Uses virDomainState.
+
+Parameters:
+
+    ?name= str
+        Name of virtual machine.
+
+Output:
+
+    {"state": int
+        State of VM. Between 0 and 8.
+    }
+
+### GET /vm_status
+Retrieves the state of a VM in English. Uses virDomainState. Alternatively, converts a domain state number into English.
+
+Parameters:
+
+    ?name= str | None
+        Name of virtual machine.
+    ?state= int | None
+        VM state number between 0 and 8.
+
+Output:
+
+    {"state": str
+        State of VM. In this list: ["no state", "running", "blocked", "paused", "shutdown", "shutoff", "crashed", "guest suspended", "other"]
     }
 
 ### POST /vm_start
@@ -122,7 +153,7 @@ Starts a named VM.
 
 Parameters:
 
-    ?name=
+    ?name= str
         Name of virtual machine.
 
 Output:
