@@ -22,7 +22,7 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 def connection():
 	return libvirt.open(QEMU_URI)
 
-def retrieve_vm(name:str) -> virDomain:
+def retrieve_vm(name:str) -> virDomain: # type: ignore
 	try:
 		with connection() as qemu:
 			try:
@@ -48,7 +48,8 @@ def vm_list(list):
 		return None;
 	out = [];
 	for vm in list:
-		elem = {"name": vm.name(), "state": status_lookup(vm.state()), "id": vm.ID()}
+		elem = {"name": vm.name(), "state": status_lookup(vm.state()[0]), "id": vm.ID()}
+		out.append(elem)
 	return out;
 
 @app.get("/")
@@ -63,7 +64,7 @@ def root():
 
 @app.get("/host")
 # @check_config(HOST_ENABLE)
-def root():
+def host():
 	try:
 		with connection() as qemu:
 			return {"host_data": qemu.getInfo()}
@@ -73,14 +74,15 @@ def root():
 
 @app.get("/vms")
 # @check_config(VMS_ENABLE)
-def root(type: str | int):
+def vms(type: str | int):
 	try:
 		with connection() as qemu:
-			if (type in ('all', -1)):
+			print(type)
+			if (type in ('all', '0', 0)):
 				return {"vms": vm_list(qemu.listAllDomains(0))}
-			elif (type in ('active', 1)):
+			elif (type in ('active', '1', 1)):
 				return {"vms": vm_list(qemu.listAllDomains(1))}
-			elif (type in ('inactive', 2)):
+			elif (type in ('inactive', '2', 2)):
 				return {"vms": vm_list(qemu.listAllDomains(2))}
 			else:
 				raise HTTPException(status_code=404, detail=f"No such type {type}")
@@ -88,11 +90,11 @@ def root(type: str | int):
 		raise e;
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500)
 
 @app.get("/vm_info")
 # @check_config(VM_DATA_ENABLE)
-def root(name: str):
+def vm_info(name: str):
 	try:
 		vm = retrieve_vm(name)
 		info = vm.info()
@@ -117,7 +119,7 @@ def root(name: str):
 
 @app.get("/vm_xmldesc")
 # @check_config(VM_XMLDESC_ENABLE)
-def root(name: str):
+def vm_xmldesc(name: str):
 	try:
 		domain = retrieve_vm(name)
 		return domain.XMLDesc()
@@ -129,7 +131,7 @@ def root(name: str):
 
 @app.get("/vm_ip")
 # @check_config(VM_XMLDESC_ENABLE)
-def root(name: str):
+def vm_ip(name: str):
 	try:
 		with connection() as qemu:
 			try:
@@ -145,7 +147,7 @@ def root(name: str):
 
 @app.get("/vm_viewer")
 # @check_config(VM_XMLDESC_ENABLE)
-def root(name: str):
+def vm_viewer(name: str):
 	try:
 		with connection() as qemu:
 			try:
@@ -172,7 +174,7 @@ def root(name: str):
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 @app.get("/vm_state")
-def root(name:str):
+def vm_state(name:str):
 	try:
 		vm = retrieve_vm(name)
 		return {"state": vm.state()}
@@ -183,7 +185,7 @@ def root(name:str):
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 @app.get("/vm_status")
-def root(name:str|None, state:int|None):
+def vm_status(name:str|None, state:int|None):
 	try:
 		if (name != None and state == None):
 			vm = retrieve_vm(name)
@@ -199,7 +201,7 @@ def root(name:str|None, state:int|None):
 
 @app.post("/vm_start")
 # @check_config(VM_START_ENABLE)
-def root(name: str):
+def vm_start(name: str):
 	try:
 		with connection() as qemu:
 			try:
@@ -221,7 +223,7 @@ def root(name: str):
 
 @app.post("/vm_stop")
 # @check_config(VM_STOP_ENABLE)
-def root(name: str):
+def vm_stop(name: str):
 	try:
 		with connection() as qemu:
 			try:
