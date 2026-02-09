@@ -9,7 +9,7 @@ from libvirt import virDomain
 from sympy import Domain
 
 # my imports
-from lib.consts import STATE_TRANSLATION_DICT
+from lib import internal_functions;
 
 # env constants
 from config import QEMU_URI,FRONTEND_BASE_URL
@@ -38,17 +38,12 @@ def retrieve_vm(name:str) -> virDomain: # type: ignore
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
-def status_lookup(state:int):
-	if (state in STATE_TRANSLATION_DICT):
-		return STATE_TRANSLATION_DICT[state]
-	return "unknown"
-
 def vm_list(list):
 	if (list == None):
 		return None;
 	out = [];
 	for vm in list:
-		elem = {"name": vm.name(), "state": status_lookup(vm.state()[0]), "id": vm.ID()}
+		elem = {"name": vm.name(), "state": internal_functions.status_lookup(vm.state()[0]), "id": vm.ID()}
 		out.append(elem)
 	return out;
 
@@ -189,9 +184,9 @@ def vm_status(name:str|None, state:int|None):
 	try:
 		if (name != None and state == None):
 			vm = retrieve_vm(name)
-			return {"status": status_lookup(vm.state())}
+			return {"status": internal_functions.status_lookup(vm.state())}
 		if (state != None and name == None):
-			return {"status": status_lookup(state)}
+			return {"status": internal_functions.status_lookup(state)}
 		raise HTTPException(status_code=422)
 	except HTTPException as e:
 		raise e
