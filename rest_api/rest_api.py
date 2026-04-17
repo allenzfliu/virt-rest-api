@@ -179,14 +179,12 @@ def vm_state(name:str):
 		print(e)
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
-@app.get("/vm_status")
-def vm_status(name:str|None, state:int|None):
+@app.get("/vm_status_lookup")
+def vm_status_lookup(state:int|None):
 	try:
-		if (name != None and state == None):
-			vm = retrieve_vm(name)
-			return {"status": internal_functions.status_lookup(vm.state())}
-		if (state != None and name == None):
-			return {"status": internal_functions.status_lookup(state)}
+		if (state != None):
+			return {"vm_status": internal_functions.status_lookup(state), 
+		   		"is_running": internal_functions.status_lookup(state) == "running"}
 		raise HTTPException(status_code=422)
 	except HTTPException as e:
 		raise e
