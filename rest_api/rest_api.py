@@ -205,7 +205,7 @@ def vm_start(name: str):
 				
 				# create starts domain
 				domain.create()
-				return RedirectResponse(FRONTEND_BASE_URL + "/vm.html?name=" + name, status_code=301)
+				return RedirectResponse(FRONTEND_BASE_URL + "vm.html?name=" + name, status_code=301)
 			except:
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
 	except HTTPException as e:
@@ -224,7 +224,7 @@ def vm_stop(name: str):
 				domain.destroy()
 			except:
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
-			return RedirectResponse(FRONTEND_BASE_URL + "/vm.html?name=" + name, status_code=301)
+			return RedirectResponse(FRONTEND_BASE_URL + "vm.html?name=" + name, status_code=301)
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internal Server Error")
