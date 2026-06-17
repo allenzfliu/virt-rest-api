@@ -36,7 +36,7 @@ def retrieve_vm(name:str) -> virDomain: # type: ignore
 		raise(e)	
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 def vm_list(list):
 	if (list == None):
@@ -55,7 +55,7 @@ def root():
 			return {"host": qemu.getHostname()}
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.get("/host")
 # @check_config(HOST_ENABLE)
@@ -65,7 +65,7 @@ def host():
 			return {"host_data": qemu.getInfo()}
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.get("/vms")
 # @check_config(VMS_ENABLE)
@@ -102,7 +102,7 @@ def vm_info(name: str):
 		raise(e)	
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 # @app.get("/vm_net")
 # # @check_config(VM_NET_ENABLE)
@@ -117,28 +117,28 @@ def vm_info(name: str):
 def vm_xmldesc(name: str):
 	try:
 		domain = retrieve_vm(name)
-		return domain.XMLDesc()
+		return {"xml": domain.XMLDesc()}
 	except HTTPException as e:
 		raise e
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
-@app.get("/vm_ip")
-# @check_config(VM_XMLDESC_ENABLE)
-def vm_ip(name: str):
-	try:
-		with connection() as qemu:
-			try:
-				domain = qemu.lookupByName(name)
-				return {"xml": domain.XMLDesc()}
-			except:
-				raise HTTPException(status_code=400,detail=f"No VM named {name}")
-	except HTTPException as e:
-		raise e
-	except Exception as e:
-		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+# @app.get("/vm_ip")
+# # @check_config(VM_XMLDESC_ENABLE)
+# def vm_ip(name: str):
+# 	try:
+# 		with connection() as qemu:
+# 			try:
+# 				domain = qemu.lookupByName(name)
+# 				return {"xml": domain.XMLDesc()}
+# 			except:
+# 				raise HTTPException(status_code=400,detail=f"No VM named {name}")
+# 	except HTTPException as e:
+# 		raise e
+# 	except Exception as e:
+# 		print(e);
+# 		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.get("/vm_viewer")
 # @check_config(VM_XMLDESC_ENABLE)
@@ -146,6 +146,8 @@ def vm_viewer(name: str):
 	try:
 		with connection() as qemu:
 			try:
+				# there's not a good option besides just hunting up the XML description.
+				# so that is what i do
 				xml:str = qemu.lookupByName(name).XMLDesc()
 				xml_root = ET.fromstring(xml)
 				devices = xml_root.find("devices")
@@ -166,7 +168,7 @@ def vm_viewer(name: str):
 		raise e
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.get("/vm_state")
 def vm_state(name:str):
@@ -177,7 +179,7 @@ def vm_state(name:str):
 		raise e
 	except Exception as e:
 		print(e)
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.get("/vm_status_lookup")
 def vm_status_lookup(state:int|None):
@@ -190,7 +192,7 @@ def vm_status_lookup(state:int|None):
 		raise e
 	except Exception as e:
 		print(e)
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.post("/vm_start")
 # @check_config(VM_START_ENABLE)
@@ -212,7 +214,7 @@ def vm_start(name: str):
 		raise(e)
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 @app.post("/vm_stop")
 # @check_config(VM_STOP_ENABLE)
@@ -227,4 +229,4 @@ def vm_stop(name: str):
 			return RedirectResponse(FRONTEND_BASE_URL + "vm.html?name=" + name, status_code=301)
 	except Exception as e:
 		print(e);
-		raise HTTPException(status_code=500, detail=f"Internal Server Error")
+		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
