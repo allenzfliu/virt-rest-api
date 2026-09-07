@@ -249,11 +249,11 @@ def vm_screenshot(name: str):
 				stream.recvAll(receiver, None)
 				stream.finish();
 				screenshot = Image.open(io.BytesIO(data))
-				png_buffer = BytesIO()
+				png_buffer = io.BytesIO()
 				screenshot.save(png_buffer, format="PNG")
 				#png_data = screenshot.convert("RGB", format='PNG')
 				#screenshot.convert('L').save(png_data, format='PNG')
-				return Response(content=png_buffer.getvalue(), mime_type="image/png")
+				return Response(content=png_buffer.getvalue(), media_type="image/png")
 			except Exception as e:
 				print(e);
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
