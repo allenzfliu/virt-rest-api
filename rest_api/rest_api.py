@@ -33,9 +33,9 @@ def retrieve_vm(name:str) -> virDomain: # type: ignore
 			except:
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
 	except HTTPException as e:
-		raise(e)	
+		raise(e)
 	except Exception as e:
-			print(e);
+		print(e);
 		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
 
 def vm_list(list):
