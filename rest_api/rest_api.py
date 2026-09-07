@@ -1,8 +1,9 @@
 #external imports
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from PIL import Image
+import io
 import xml.etree.ElementTree as ET
 import libvirt
 import sys
@@ -247,7 +248,9 @@ def vm_screenshot(name: str):
 				data = bytearray()
 				stream.recvAll(receiver, None)
 				stream.finish();
-				return Response(content=bytes(data), media_type=mime_type)
+				screenshot = Image.open(io.BytesIO(data))
+				png_data = img.convert('L').save(img.convert("RGBA"), format='PNG')
+				return Response(content=bytes(png_data), mime_type="image/png")
 			except Exception as e:
 				print(e);
 				raise HTTPException(status_code=400, detail=f"No VM named {name}")
