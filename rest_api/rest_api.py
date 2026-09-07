@@ -235,20 +235,25 @@ def vm_stop(name: str):
 @app.get("/vm_screenshot")
 def vm_screenshot(name: str):
 	try:
-		def receive_stream(stream):
-			def receiver(stream, in_buffer, out_buffer):
-				out_buffer.extend(buffer)
-				return 0;
-			buffer = bytearray();
-			stream.recvAll(receiver, buffer)
-			return buffer;
-		vm = retrieve_vm(name)
-		stream = qemu.newStream()
-		mime_type = vm.screenshot(stream, 0, 0);
-		data = bytearray()
-		receive_stream(stream)
-		stream.finish();
-		return Response(content=bytes(data), media_type=mime_type)
+		with connection() as qemu:
+			try:
+				def receive_stream(stream):
+					def receiver(stream, in_buffer, out_buffer):
+						out_buffer.extend(buffer)
+						return 0;
+					buffer = bytearray();
+					stream.recvAll(receiver, buffer)
+					return buffer;
+				vm = retrieve_vm(name)
+				stream = qemu.newStream()
+				mime_type = vm.screenshot(stream, 0, 0);
+				data = bytearray()
+				receive_stream(stream)
+				stream.finish();
+				return Response(content=bytes(data), media_type=mime_type)
+			except:
+				raise HTTPException(status_code=400, detail=f"No VM named {name}")
+			return RedirectResponse(FRONTEND_BASE_URL + "vm.html?name=" + name, status_code=301)
 	except Exception as e:
 		print(e);
 		raise HTTPException(status_code=500, detail=f"Internyal Server Error")
