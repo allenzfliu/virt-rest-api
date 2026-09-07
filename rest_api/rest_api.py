@@ -238,18 +238,14 @@ def vm_screenshot(name: str):
 	try:
 		with connection() as qemu:
 			try:
-				def receive_stream(stream):
-					def receiver(stream, in_buffer, out_buffer):
-						out_buffer.extend(buffer)
-						return 0;
-					buffer = bytearray();
-					stream.recvAll(receiver, buffer)
-					return buffer;
+				def receiver(stream, in_buffer, __):
+					data.extend(in_buffer)
+					return 0;
 				vm = qemu.lookupByName(name)
 				stream = qemu.newStream()
 				mime_type = vm.screenshot(stream, 0, 0);
 				data = bytearray()
-				receive_stream(stream)
+				stream.recvAll(receiver, None)
 				stream.finish();
 				return Response(content=bytes(data), media_type=mime_type)
 			except Exception as e:
